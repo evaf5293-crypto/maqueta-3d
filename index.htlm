@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta estereo-tectónica</title>
+<style>
+body{margin:0;background:#f0eee8;font-family:Arial;text-align:center;color:#203746}
+h3{padding:15px}
+canvas{width:100%;max-height:75vh;touch-action:none}
+button{padding:12px;margin:8px;border:0;border-radius:20px;background:#163d5a;color:white}
+</style>
+</head>
+<body>
+<h3>Maqueta estereo-tectónica<br>15 × 15 × 15 cm</h3>
+<canvas id="c" width="700" height="700"></canvas>
+<p>Arrastra para girar la maqueta</p>
+<button onclick="a=0.6;b=0.5;draw()">Restablecer vista</button>
+<script>
+let c=document.getElementById('c'),x=c.getContext('2d'),a=.6,b=.5;
+let parts=[];
+function box(X,Y,Z,W,D,H,col){
+let v=[[-W/2,-D/2,-H/2],[W/2,-D/2,-H/2],[W/2,D/2,-H/2],[-W/2,D/2,-H/2],[-W/2,-D/2,H/2],[W/2,-D/2,H/2],[W/2,D/2,H/2],[-W/2,D/2,H/2]];
+parts.push({v:v.map(p=>[p[0]+X,p[1]+Y,p[2]+Z]),col});
+}
+box(7.5,7.5,.2,15,15,.4,'#a17a50');
+for(let X of [.7,14.3])for(let Y of [.7,14.3])box(X,Y,7.5,.5,.5,14,'#163d5a');
+for(let z of [4.8,9.4,14])for(let y of [.7,14.3])box(7.5,y,z,13.7,.5,.5,'#343b40');
+for(let z of [4.8,9.4,14])for(let X of [.7,14.3])box(X,7.5,z,.5,13.7,.5,'#343b40');
+box(5.5,6,1,9,10,.4,'#92948e');
+box(8.4,8.5,5,10,8,.4,'#d8cfb9');
+box(6,6,9.6,9,10,.4,'#92948e');
+box(7,12,2.8,7,.25,3,'#d8cfb9');
+box(2.3,8,7,.2,4,8,'#163d5a');
+box(10,10.8,7,4,.2,6,'#163d5a');
+for(let i=0;i<7;i++)box(3.5+i*.6,4+i*.35,1.4+i*.5,1,.7,.18,'#d8cfb9');
+function draw(){
+x.clearRect(0,0,700,700);x.fillStyle='#f0eee8';x.fillRect(0,0,700,700);
+let faces=[[0,1,2,3],[4,7,6,5],[0,4,5,1],[1,5,6,2],[2,6,7,3],[3,7,4,0]];
+let all=parts.map(o=>{let q=o.v.map(p=>{let X=p[0]-7.5,Y=p[1]-7.5,Z=p[2]-7.5;
+let u=X*Math.cos(a)-Y*Math.sin(a),v=X*Math.sin(a)+Y*Math.cos(a);
+let w=v*Math.cos(b)-Z*Math.sin(b),d=v*Math.sin(b)+Z*Math.cos(b);
+return [350+u*23,360-w*23,d]});
+return {q,col:o.col,dep:q.reduce((s,p)=>s+p[2],0)/8}});
+all.sort((p,q)=>p.dep-q.dep);
+for(let o of all)for(let f of faces){x.beginPath();f.forEach((i,j)=>j?x.lineTo(o.q[i][0],o.q[i][1]):x.moveTo(o.q[i][0],o.q[i][1]));x.closePath();x.fillStyle=o.col;x.fill();x.strokeStyle='#514b43';x.lineWidth=.8;x.stroke()}
+}
+let down=false,px=0,py=0;
+c.onpointerdown=e=>{down=true;px=e.clientX;py=e.clientY;c.setPointerCapture(e.pointerId)};
+c.onpointerup=()=>down=false;
+c.onpointermove=e=>{if(down){a+=(e.clientX-px)*.01;b+=(e.clientY-py)*.01;px=e.clientX;py=e.clientY;draw()}};
+draw();
+</script>
+</body>
+</html>
